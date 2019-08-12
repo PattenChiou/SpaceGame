@@ -4,7 +4,7 @@ from os import path
 import pygame
 
 # TODO Refactor 將參數統一放到另外一個檔案
-SHOT_DELAY = 300
+SHOT_DELAY = 30
 
 YELLOW = (255, 255, 0)
 
