@@ -136,9 +136,20 @@ all_sprites.add(player)
 all_sprites.add(meteors)
 running = True
 sound_pew = pygame.mixer.Sound(path.join(sound_dir, "pew.wav"))
-
-
-
+#live=pygame.image.load(path.join(img_dir,"playerShip1_orange.png"))
+live=3
+def draw_lives():
+    global live
+    img_live = pygame.transform.scale(player.image,(30,20))
+    if player.shield<=0:
+        live-=1
+        if live!=0:
+            player.shield=100
+    for i in range(live):
+        live_rect = img_live.get_rect()
+        live_rect.x = 700+25*i
+        live_rect.y = 10
+        screen.blit(img_live,live_rect)
 def draw_shield():
     shield_bar=pygame.rect.Rect(10,10,player.shield,10)
     outline=pygame.rect.Rect(10,10,100,10)
@@ -155,8 +166,8 @@ def check_meteor_hit_player():
             
             player.shield-=hit.size
             #print(player.shield)
-            if player.shield<=0:
-                running = False
+            #if player.shield<=0:
+            #    running = False
 weapon=False
 weapon_time=0
 def check_player_hit_supports():
@@ -230,7 +241,6 @@ def check_bullets_hit_meteor():
             support=Support(hit.rect.centerx,hit.rect.centery,type)
             supports.add(support)
             all_sprites.add(supports)
-            # TODO 06.擊破隕石會掉出武器或是能量包 武器可以改變攻擊模式 能量包可以回血
 
 def draw_score():
     font = pygame.font.Font(font_name, 14)
@@ -253,11 +263,9 @@ def shoot2():
     all_sprites.add(bullet)
     bullet2 = Bullet(player.rect.centerx+20, player.rect.centery)
     all_sprites.add(bullet2)
-
 while running:
     # clocks control how fast the loop will execute
     clock.tick(FPS)
-
     # event trigger
     # TODO 新增起始畫面 按下空白鍵才開始遊戲
     for event in pygame.event.get():
@@ -277,6 +285,8 @@ while running:
                 else:
                     weapon=False
                     Bullet.speedy=10
+    if live==0:
+        running=False
         
 
 
@@ -294,6 +304,7 @@ while running:
     screen.blit(bg,bg_rect)
     draw_score()
     draw_shield()
+    draw_lives()
     
     all_sprites.draw(screen)
     # flip to display
