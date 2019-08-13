@@ -276,7 +276,6 @@ while running:
     # clocks control how fast the loop will execute
     clock.tick(FPS)
     # event trigger
-    # TODO 新增起始畫面 按下空白鍵才開始遊戲
     for event in pygame.event.get():
         if event.type == pygame.QUIT:
             running = False
