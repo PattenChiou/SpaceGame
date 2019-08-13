@@ -4,7 +4,7 @@ from os import path
 import pygame
 
 # TODO Refactor 將參數統一放到另外一個檔案
-SHOT_DELAY = 30
+SHOT_DELAY = 300
 
 YELLOW = (255, 255, 0)
 
@@ -90,6 +90,7 @@ class Meteor(pygame.sprite.Sprite):
 
 
 class Bullet(pygame.sprite.Sprite):
+    speedy=10
     def __init__(self, posx, posy):
         pygame.sprite.Sprite.__init__(self)
 
@@ -97,7 +98,7 @@ class Bullet(pygame.sprite.Sprite):
         self.rect = self.image.get_rect()
         self.rect.centerx = posx
         self.rect.centery = posy
-        self.speedy = 100
+        #self.speedy = 10
 
     def update(self):
         self.rect.y -= self.speedy
@@ -120,6 +121,7 @@ clock = pygame.time.Clock()
 meteors = pygame.sprite.Group()
 all_sprites = pygame.sprite.Group()
 bullets = pygame.sprite.Group()
+supports=pygame.sprite.Group()
 
 last_shot = pygame.time.get_ticks()
 now = 0
@@ -155,7 +157,25 @@ def check_meteor_hit_player():
             #print(player.shield)
             if player.shield<=0:
                 running = False
+weapon=False
+weapon_time=0
+def check_player_hit_supports():
+    global running, supports,score,weapon,weapon_time
+    hits = pygame.sprite.spritecollide(player,supports, False,pygame.sprite.collide_circle_ratio(0.7))
+    if hits:
+        for hit in hits:
+            hit.kill()
+            if hit.type==0:
+                weapon=True
+                weapon_time=pygame.time.get_ticks()
+                Bullet.speedy=100
+            elif hit.type==1:
+                player.shield+=5
+                if player.shield>100:
+                    player.shield=100
+            # print("check_meteor_hit_player")
 ani_list=[]
+
 class Explosion(pygame.sprite.Sprite):
     for i in range(0,9):
         ani_list.append(pygame.image.load(path.join(img_dir,"regularExplosion0%d.png"%i)))
@@ -177,6 +197,23 @@ class Explosion(pygame.sprite.Sprite):
             self.kill()
     def play(self):
         pass
+class Support(pygame.sprite.Sprite):
+    def __init__(self,x, y, type):
+        pygame.sprite.Sprite.__init__(self)
+        if type==0:
+            self.image =pygame.image.load(path.join(img_dir,"enemyBlue1.png"))
+        else:
+            self.image =pygame.image.load(path.join(img_dir,"shield_silver.png"))
+        self.rect = self.image.get_rect()
+        self.rect.centerx = x
+        self.rect.centery = y
+        self.speedy = 8
+        self.type=type
+    
+    def update(self):
+        self.rect.centery = self.rect.centery + self.speedy
+        if self.rect.centery>HEIGHT:
+            self.kill()
 def check_bullets_hit_meteor():
     global  score
     hits = pygame.sprite.groupcollide(meteors,bullets, True, True,pygame.sprite.collide_circle_ratio(1))
@@ -189,6 +226,10 @@ def check_bullets_hit_meteor():
             newMeteor()
             explosion=Explosion(hit.rect.centerx,hit.rect.centery)
             all_sprites.add(explosion)
+            type=random.randint(0,1)
+            support=Support(hit.rect.centerx,hit.rect.centery,type)
+            supports.add(support)
+            all_sprites.add(supports)
             # TODO 06.擊破隕石會掉出武器或是能量包 武器可以改變攻擊模式 能量包可以回血
 
 def draw_score():
@@ -205,7 +246,13 @@ def shoot():
     bullet = Bullet(player.rect.centerx, player.rect.centery)
     bullets.add(bullet)
     all_sprites.add(bullet)
-
+def shoot2():
+    sound_pew.play()
+    bullet = Bullet(player.rect.centerx, player.rect.centery)
+    bullets.add(bullet)
+    all_sprites.add(bullet)
+    bullet2 = Bullet(player.rect.centerx+20, player.rect.centery)
+    all_sprites.add(bullet2)
 
 while running:
     # clocks control how fast the loop will execute
@@ -220,8 +267,16 @@ while running:
     if keystate[pygame.K_SPACE]:
         now=pygame.time.get_ticks()
         if now-last_shot>SHOT_DELAY:
-            shoot()
-            last_shot=now
+            if weapon==False:
+                shoot()
+                last_shot=now
+            else:
+                if pygame.time.get_ticks()-weapon_time<=10000:
+                    shoot2()
+                    last_shot=now
+                else:
+                    weapon=False
+                    Bullet.speedy=10
         
 
 
@@ -229,6 +284,7 @@ while running:
     check_meteor_hit_player()
     #
     check_bullets_hit_meteor()
+    check_player_hit_supports()
 
     all_sprites.update()
 
