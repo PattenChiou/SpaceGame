@@ -263,6 +263,15 @@ def shoot2():
     all_sprites.add(bullet)
     bullet2 = Bullet(player.rect.centerx+20, player.rect.centery)
     all_sprites.add(bullet2)
+gamestate="begin"
+def show_text(text,x,y,size):
+    font=pygame.font.Font(font_name,size)
+    text=font.render(text,True,YELLOW)
+    screen.blit(text,(x,y))
+def show_begin_screen():
+    show_text("SHUMP!",250,150,100)
+    show_text("Arrow keys move. Space to Fire",230,300,30)
+    show_text("Press Space to begin.",320,400,20)
 while running:
     # clocks control how fast the loop will execute
     clock.tick(FPS)
@@ -271,43 +280,51 @@ while running:
     for event in pygame.event.get():
         if event.type == pygame.QUIT:
             running = False
-    keystate = pygame.key.get_pressed()
-    if keystate[pygame.K_SPACE]:
-        now=pygame.time.get_ticks()
-        if now-last_shot>SHOT_DELAY:
-            if weapon==False:
-                shoot()
-                last_shot=now
-            else:
-                if pygame.time.get_ticks()-weapon_time<=10000:
-                    shoot2()
+    if gamestate=="begin":
+        #show_begin_screen()
+        keystate=pygame.key.get_pressed()
+        if keystate[pygame.K_SPACE]:
+            gamestate="start"
+        else:
+            show_begin_screen()
+    elif gamestate=="start":
+        keystate = pygame.key.get_pressed()
+        if keystate[pygame.K_SPACE]:
+            now=pygame.time.get_ticks()
+            if now-last_shot>SHOT_DELAY:
+                if weapon==False:
+                    shoot()
                     last_shot=now
                 else:
-                    weapon=False
-                    Bullet.speedy=10
-    if live==0:
-        running=False
+                    if pygame.time.get_ticks()-weapon_time<=10000:
+                        shoot2()
+                        last_shot=now
+                    else:
+                        weapon=False
+                        Bullet.speedy=10
+        if live==0:
+            gamestate="begin"
+            
+
+
+        # update the state of sprites
+        check_meteor_hit_player()
+        #
+        check_bullets_hit_meteor()
+        check_player_hit_supports()
+
+        all_sprites.update()
+
+        # draw on screen
+
+        # screen.fill(BLACK)
+        screen.blit(bg,bg_rect)
+        draw_score()
+        draw_shield()
+        draw_lives()
         
-
-
-    # update the state of sprites
-    check_meteor_hit_player()
-    #
-    check_bullets_hit_meteor()
-    check_player_hit_supports()
-
-    all_sprites.update()
-
-    # draw on screen
-
-    # screen.fill(BLACK)
-    screen.blit(bg,bg_rect)
-    draw_score()
-    draw_shield()
-    draw_lives()
-    
-    all_sprites.draw(screen)
-    # flip to display
+        all_sprites.draw(screen)
+        # flip to display
     pygame.display.flip()
 
 pygame.quit()
