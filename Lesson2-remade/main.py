@@ -3,6 +3,7 @@ from os import path
 from Explosion import Explosion
 import pygame
 from Bullet import *
+from Meteor import *
 
 # TODO Refactor 將參數統一放到另外一個檔案
 from Env import *
@@ -47,43 +48,7 @@ class Player(pygame.sprite.Sprite):
         self.rect.y += dy
 
 
-class Meteor(pygame.sprite.Sprite):
-    def __init__(self):
-        pygame.sprite.Sprite.__init__(self)
-        self.size = random.randrange(3, 8)
-        image = pygame.image.load(path.join(img_dir, "meteor.png"))
-        self.image = pygame.transform.scale(image, (self.size * 8, self.size * 8))
 
-        self.rect = self.image.get_rect()
-        self.rect.x = random.randrange(0, WIDTH)
-        self.rect.y = 0
-        self.speedx = random.randint(-5, 5)
-        self.speedy = random.randint(7, 15)
-        self.image_origin=self.image
-        self.rot_angle=5
-        self.angle=0
-
-    def update(self):
-        self.rect.x += self.speedx
-        self.rect.y += self.speedy
-        old_center=self.rect.center
-        self.angle=self.angle+self.rot_angle
-        self.image=pygame.transform.rotate(self.image_origin,self.angle)
-        self.rect=self.image.get_rect()
-        self.rect.center=old_center
-        if (self.rect.y > HEIGHT):
-            newMeteor()
-            self.kill()
-
-
-
-
-
-def newMeteor():
-    global all_sprites
-    m = Meteor()
-    meteors.add(m)
-    all_sprites.add(m)
 
 
 screen = pygame.display.set_mode((WIDTH, HEIGHT))
@@ -101,6 +66,11 @@ now = 0
 score = 0
 player = Player(WIDTH / 2, HEIGHT - 50)
 
+def newMeteor():
+    global all_sprites
+    m = Meteor(meteors,all_sprites)
+    meteors.add(m)
+    all_sprites.add(m)
 for i in range(8):
     newMeteor()
 
