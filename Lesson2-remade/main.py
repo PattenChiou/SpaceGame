@@ -5,6 +5,7 @@ import pygame
 from Bullet import *
 from Meteor import *
 from Player import *
+from begin_state import *
 
 # TODO Refactor 將參數統一放到另外一個檔案
 from Env import *
@@ -79,7 +80,7 @@ def check_meteor_hit_player():
             # print("check_meteor_hit_player"        )
             newMeteor()
             
-            player.shield-=hit.size
+            player.shield-=hit.size*5
             #print(player.shield)
             #if player.shield<=0:
             #    running = False
@@ -165,6 +166,7 @@ def show_begin_screen():
     show_text("SHUMP!",250,150,100)
     show_text("Arrow keys move. Space to Fire",230,300,30)
     show_text("Press Space to begin.",320,400,20)
+begin_state=Begin_state(screen)
 while running:
     # clocks control how fast the loop will execute
     clock.tick(FPS)
@@ -173,12 +175,9 @@ while running:
         if event.type == pygame.QUIT:
             running = False
     if gamestate=="begin":
-        #show_begin_screen()
-        keystate=pygame.key.get_pressed()
-        if keystate[pygame.K_SPACE]:
-            gamestate="start"
-        else:
-            show_begin_screen()
+        begin_state.keyhandle()
+        gamestate=begin_state.updatestate()
+        begin_state.show_begin_screen()
     elif gamestate=="start":
         keystate = pygame.key.get_pressed()
         if keystate[pygame.K_SPACE]:
@@ -194,7 +193,7 @@ while running:
                     else:
                         weapon=False
                         Bullet.speedy=10
-        if live==0:
+        if live<=0:
             gamestate="begin"
             
 
