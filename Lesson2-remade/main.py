@@ -2,6 +2,7 @@ import random
 from os import path
 from Explosion import Explosion
 import pygame
+from Bullet import *
 
 # TODO Refactor 將參數統一放到另外一個檔案
 from Env import *
