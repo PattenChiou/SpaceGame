@@ -4,21 +4,7 @@ from os import path
 import pygame
 
 # TODO Refactor 將參數統一放到另外一個檔案
-SHOT_DELAY = 300
-
-YELLOW = (255, 255, 0)
-
-HEIGHT = 600
-
-WIDTH = 800
-
-BLACK = (0, 0, 0)
-
-GREEN = (0, 255, 0)
-
-RED = (255, 0, 0)
-
-FPS = 30
+from Env import *
 
 img_dir = path.join(path.dirname(__file__), 'img')
 sound_dir = path.join(path.dirname(__file__), 'sound')
