@@ -8,7 +8,7 @@ from Meteor import *
 # TODO Refactor 將參數統一放到另外一個檔案
 from Env import *
 
-img_dir = path.join(path.dirname(__file__), 'img')
+
 sound_dir = path.join(path.dirname(__file__), 'sound')
 font_name = pygame.font.match_font('arial')
 pygame.init()

@@ -2,7 +2,7 @@ import pygame
 from os import path
 from Env import *
 import random
-img_dir = path.join(path.dirname(__file__), 'img')
+
 class Meteor(pygame.sprite.Sprite):
     def __init__(self,meteors,all):
         pygame.sprite.Sprite.__init__(self)

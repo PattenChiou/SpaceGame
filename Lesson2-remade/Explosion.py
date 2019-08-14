@@ -4,7 +4,6 @@ from os import path
 import random
 
 ani_list=[]
-img_dir = path.join(path.dirname(__file__), 'img')
 class Explosion(pygame.sprite.Sprite):
     for i in range(0,9):
         ani_list.append(pygame.image.load(path.join(img_dir,"regularExplosion0%d.png"%i)))
