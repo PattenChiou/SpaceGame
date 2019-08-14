@@ -17,6 +17,9 @@ class Begin_state():
         keystate=pygame.key.get_pressed()
         if keystate[pygame.K_SPACE]:
             self.gamestate="start"
+            return True
     def updatestate(self):
         return self.gamestate
+    def reset(self):
+        self.gamestate="begin"
     
