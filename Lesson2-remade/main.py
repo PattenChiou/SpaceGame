@@ -30,14 +30,61 @@ bg_rect = bg.get_rect()
 clock = pygame.time.Clock()
 
 meteors = pygame.sprite.Group()
+enemies = pygame.sprite.Group()
 all_sprites = pygame.sprite.Group()
 bullets = pygame.sprite.Group()
+bullets_enemies = pygame.sprite.Group()
 supports=pygame.sprite.Group()
 
 last_shot = pygame.time.get_ticks()
+
 now = 0
 score = 0
 player = Player(WIDTH / 2, HEIGHT - 50)
+
+class Enemy(pygame.sprite.Sprite):
+    def __init__(self,enemies,all):
+        pygame.sprite.Sprite.__init__(self)
+        self.size = random.randrange(3, 8)
+        image = pygame.image.load(path.join(img_dir, "enemyBlack1.png"))
+        self.image = pygame.transform.scale(image, (self.size * 8, self.size * 8))
+
+        self.rect = self.image.get_rect()
+        self.rect.x = random.randrange(0, WIDTH)
+        self.rect.y = 0
+        self.speedx = 0
+        self.speedy = 5
+        self.image_origin=self.image
+        self.rot_angle=5
+        self.angle=0
+        self.group=enemies
+        self.all_sprites=all
+        self.last_shot=pygame.time.get_ticks()
+        self.now=pygame.time.get_ticks()
+    def update(self):
+        global last_shot_enemy
+        self.rect.x += self.speedx
+        self.rect.y += self.speedy
+        if (self.rect.y > HEIGHT):
+            self.newEnemy()
+            self.kill()
+        self.now=pygame.time.get_ticks()
+        if self.now-self.last_shot>SHOT_DELAY:
+            self.shoot_enemy()
+            self.last_shot=self.now
+
+    def shoot_enemy(self):
+        sound_pew.play()
+        bullet = Bullet_enemy(self.rect.centerx,self.rect.centery)
+        bullets_enemies.add(bullet)
+        all_sprites.add(bullet)
+
+    def newEnemy(self):
+        #global all_sprites
+        e = Enemy(self.group,self.all_sprites)
+        self.group.add(e)
+        self.all_sprites.add(e)
+
 
 def newMeteor():
     global all_sprites
@@ -46,6 +93,13 @@ def newMeteor():
     all_sprites.add(m)
 for i in range(8):
     newMeteor()
+def newEnemy():
+    global all_sprites
+    e = Enemy(enemies,all_sprites)
+    enemies.add(e)
+    all_sprites.add(e)
+for i in range(8):
+    newEnemy()
 
 all_sprites.add(bullets)
 all_sprites.add(player)
@@ -84,6 +138,19 @@ def check_meteor_hit_player():
             #print(player.shield)
             #if player.shield<=0:
             #    running = False
+def check_enemy_hit_player():
+    global running, enemies
+    hits = pygame.sprite.spritecollide(player, enemies, False,pygame.sprite.collide_circle_ratio(0.7))
+    if hits:
+        for hit in hits:
+            hit.kill()
+            # print("check_meteor_hit_player"        )
+            newEnemy()
+            
+            player.shield-=hit.size*5
+            #print(player.shield)
+            #if player.shield<=0:
+            #    running = False
 weapon=False
 weapon_time=0
 def check_player_hit_supports():
@@ -97,7 +164,7 @@ def check_player_hit_supports():
                 weapon_time=pygame.time.get_ticks()
                 Bullet.speedy=100
             elif hit.type==1:
-                player.shield+=5
+                player.shield+=25
                 if player.shield>100:
                     player.shield=100
             # print("check_meteor_hit_player")
@@ -106,7 +173,7 @@ class Support(pygame.sprite.Sprite):
     def __init__(self,x, y, type):
         pygame.sprite.Sprite.__init__(self)
         if type==0:
-            self.image =pygame.image.load(path.join(img_dir,"enemyBlue1.png"))
+            self.image =pygame.image.load(path.join(img_dir,"star_gold.png"))
         else:
             self.image =pygame.image.load(path.join(img_dir,"shield_silver.png"))
         self.rect = self.image.get_rect()
@@ -136,6 +203,31 @@ def check_bullets_hit_meteor():
             supports.add(support)
             all_sprites.add(supports)
 
+def check_bullets_hit_enemy():
+    global  score
+    hits = pygame.sprite.groupcollide(enemies,bullets,True,True,pygame.sprite.collide_circle_ratio(1))
+    if hits:
+        for hit in hits:
+            hit.kill()
+            score += (hit.size)*2
+            
+            # print("check_bullets_hit_meteor")
+            newEnemy()
+            explosion=Explosion(hit.rect.centerx,hit.rect.centery)
+            all_sprites.add(explosion)
+            type=random.randint(0,1)
+            support=Support(hit.rect.centerx,hit.rect.centery,type)
+            supports.add(support)
+            all_sprites.add(supports)
+def check_bullets_hit_player():
+    global  score
+    hits = pygame.sprite.spritecollide(player,bullets_enemies,False,pygame.sprite.collide_circle_ratio(1))
+    if hits:
+        for hit in hits:
+            hit.kill()
+            player.shield-= 5
+            
+            # print("check_bullets_hit_meteor")
 def draw_score():
     font = pygame.font.Font(font_name, 14)
     text_surface = font.render(str(score), True, YELLOW)
@@ -152,11 +244,12 @@ def shoot():
     all_sprites.add(bullet)
 def shoot2():
     sound_pew.play()
-    bullet = Bullet(player.rect.centerx, player.rect.centery)
+    bullet = Bullet(player.rect.centerx-10, player.rect.centery)
     bullets.add(bullet)
     all_sprites.add(bullet)
-    bullet2 = Bullet(player.rect.centerx+20, player.rect.centery)
+    bullet2 = Bullet(player.rect.centerx+10, player.rect.centery)
     all_sprites.add(bullet2)
+
 gamestate="begin"
 def show_text(text,x,y,size):
     font=pygame.font.Font(font_name,size)
@@ -208,6 +301,9 @@ while running:
         #
         check_bullets_hit_meteor()
         check_player_hit_supports()
+        check_enemy_hit_player()
+        check_bullets_hit_enemy()
+        check_bullets_hit_player()
 
         all_sprites.update()
 
