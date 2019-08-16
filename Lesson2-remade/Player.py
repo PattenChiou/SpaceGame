@@ -9,8 +9,8 @@ class Player(pygame.sprite.Sprite):
         self.rect = self.image.get_rect()
         self.rect.centerx = x
         self.rect.centery = y
-        self.speedx = 0
-        self.speedy=0
+        self.speedx = 8
+        self.speedy=8
         self.shield=100
         #self.ax=0
         #self.ay=0
